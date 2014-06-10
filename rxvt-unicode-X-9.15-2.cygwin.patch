@@ -1,0 +1,691 @@
+--- origsrc/rxvt-unicode-9.15/CYGWIN-PATCHES/URxvt.Xdefaults	1969-12-31 19:00:00.000000000 -0500
++++ src/rxvt-unicode-9.15/CYGWIN-PATCHES/URxvt.Xdefaults	2012-12-03 23:21:01.638317000 -0500
+@@ -0,0 +1,17 @@
++
++! ---------[ urxvt ] ---------
++URxvt*background: #000040
++URxvt*foreground: #ffffbf
++URxvt*scrollBar:	true
++URxvt*scrollBar_right:	true
++URxvt*font:		xft:Bitstream Vera Sans Mono:size=16:medium:roman:antialias=true
++URxvt*boldFont:		xft:Bitstream Vera Sans Mono:size=16:bold:roman:antialias=true
++URxvt*italicFont:	xft:Bitstream Vera Sans Mono:size=16:medium:italic:autohint=true:antialias=true
++URxvt*boldItalicFont:	xft:Bitstream Vera Sans Mono:size=16:bold:italic:autohint=true:antialias=true
++URxvt*fading:		60
++URxvt*tintColor:	white
++URxvt*shading:		20
++!URxvt*inheritPixmap:	true
++!URxvt*colorBD:		green
++!URxvt*colorIT:		blue
++!URxvt*secondaryWheel:	true
+--- origsrc/rxvt-unicode-9.15/CYGWIN-PATCHES/rxvt-unicode-X.README	1969-12-31 19:00:00.000000000 -0500
++++ src/rxvt-unicode-9.15/CYGWIN-PATCHES/rxvt-unicode-X.README	2012-12-03 23:30:17.240095600 -0500
+@@ -0,0 +1,477 @@
++rxvt-unicode-X
++========================================================================
++An improved version of rxvt requiring an Xserver.  The upstream
++codebase supports unicode as well as possessing numerous bugfixes
++over the unmaintained rxvt code.
++
++See 'Customizations' section for fun-things-to-do.
++
++Runtime requirements:
++  cygwin-1.7.17-1
++  rxvt-unicode-common
++  libfontconfig1-2.10.1-1
++  libgdk_pixbuf2.0_0-2.26.4-2
++  libgcc1-4.5.3-3
++  libstdc++6-4.5.3-3
++  libX11_6-1.5.0-1
++  libXft2-2.3.1-1
++  libXrender1-0.9.7-1
++  perl-5.14.2-3
++  font-bitstream-vera-ttf-1.10-1
++  cygutils-1.4.10-2
++  run-1.1.13-1
++  run2-0.4.0-1
++  bash-4.1.10-4
++  coreutils-8.15-1
++  ncurses-5.7-18
++  grep-2.6.3-1
++  diffutils-3.2-1
++  sed-4.2.1-2
++  gawk-4.0.1-1
++
++Build requirements:
++  cygwin-1.7.17-1
++  gcc4-core-4.5.3-3
++  gcc4-g++-4.5.3-3
++  binutils-2.22.51-2
++  libbz2-devel
++  libexpat1-devel
++  libfontconfig-devel
++  libfreetype-devel
++  libgdk_pixbuf2.0-devel
++  libglib2.0-devel
++  libiconv
++  gettext
++  libpcre-devel
++  libpng14-devel
++  libX11-devel
++  libXau-devel
++  libxcb-devel
++  libXdmcp-devel
++  libXft-devel
++  libXrender-devel
++  zlib-devel
++  perl-5.14
++  crypt
++  cygport-0.11.1-1
++
++Canonical homepage:
++  http://software.schmorp.de/pkg/rxvt-unicode.html
++
++Canonical download:
++  http://dist.schmorp.de/rxvt-unicode/
++
++License:
++  GPL
++
++Language:
++  C, C++, Perl
++
++========================================================================
++
++Build instructions:
++  unpack rxvt-unicode-X-9.15-N-src.tar.bz2
++    if you use setup to install this src package, it will be
++	 unpacked under /usr/src automatically
++  cd /usr/src
++  cygport ./rxvt-unicode-X-9.15-N.cygport all
++
++This will create:
++  /usr/src/rxvt-unicode-X-9.15-N.tar.bz2
++  /usr/src/rxvt-unicode-common-9.15-N.tar.bz2
++  /usr/src/rxvt-unicode-X-9.15-N-src.tar.bz2
++  /usr/src/rxvt-unicode-X-debuginfo-9.15-N.tar.bz2
++
++Or use './rxvt-unicode-X-9.15-N.cygport prep' to get a patched source directory
++
++========================================================================
++
++To find out the files included in the binary distribution, you can
++use "cygcheck -l rxvt-unicode-X", or browse the listing for the appropriate 
++version at <http://cygwin.com/packages/>.
++
++========================================================================
++Port Notes:
++
++  Rxvt version:               9.15 : 2012-01-21
++  Source code location:       /usr/src/packages/rxvt-unicode-X/rxvt-unicode-X-9.15-2/src/rxvt-unicode-9.15
++  Install path:               /usr/bin
++  Compiler:                   g++
++  Compiler flags:             -ggdb -O2 -pipe -fdebug-prefix-map=/usr/src/packages/rxvt-unicode-X/rxvt-unicode-X-9.15-2/build=/usr/src/debug/rxvt-unicode-X-9.15-2 -fdebug-prefix-map=/usr/src/packages/rxvt-unicode-X/rxvt-unicode-X-9.15-2/src/rxvt-unicode-9.15=/usr/src/debug/rxvt-unicode-X-9.15-2 -w
++  Linker:                     $(CXX)
++  default resource name:      urxvt
++  resource class:             URxvt
++  resource class fallback:    Rxvt
++
++  embedded perl:              yes
++  image library:              gdk-pixbuf
++
++=================================================================
++Many thanks to Thomas Wolff, who provided the original (partial)
++unicode support used in rxvt-unicode-7.07 and earlier on cygwin
++1.5.x.  Now that cygwin-1.7.x supports unicode itself, Thomas'
++earlier contributions are no longer necessary.
++=================================================================
++
++FONTS:
++------
++Note that you will get less-than-desirable results unless you are
++using fonts which support your current locale.  If your current
++locale uses a Latin alphabet, then many of the standard truetype
++fonts installed with windows or the cygwin X server will probably
++do. However, if your locale requires other glyphs, or you intend
++to use a combination of locales/character sets (such as editing
++UTF-8 documents that use many languages), then you may need to set
++up additional fonts.  That procedure is beyond the scope of this
++README, but here's the short version that worked for me, for ONE
++font:
++  (1) manually installed freefont-ttf
++        http://download.savannah.nongnu.org/releases/freefont/
++      into /usr/share/fonts/freefont/
++  (2) cd /usr/share/fonts/freefont/
++  (3) ran 'mkfontscale -e /usr/share/fonts/encodings'
++  (4) ran 'fc-cache' to refresh the fontconfig database (Fortunately, I 
++      didn't need to edit /etc/fonts/local.conf because /usr/share/fonts/
++      was already in the fontconfig search path, so .../freefont/ would
++      be found anyway)
++  (5) modified my ~/.Xdefaults file to include the following, so that
++      for iso88590-1 I get Bitstream but for all other locales it uses
++      FreeMono:
++
++URxvt*font: xft:Bitstream Vera Sans Mono:size=14:medium:roman:antialias=true,\
++            xft:FreeMono:size=16:thin:roman:antialias=true
++URxvt*boldFont: xft:Bitstream Vera Sans Mono:size=14:bold:roman:antialias=true,\
++                xft:FreeMono:size=16:medium:roman:antialias=true
++URxvt*italicFont: xft:Bitstream Vera Sans Mono:size=14:medium:italic:\
++                  autohint=true:antialias=true,xft:FreeMono:size=16:thin:\
++                  italic:autohing=true:antialias=true
++URxvt*boldItalicFont: xft:Bitstream Vera Sans Mono:size=14:bold:italic:\
++                      autohint=true:antialias=true,xft:FreeMono:size=16:\
++                      medium:italic:autohing=true:antialias=true
++
++  (7) restarted my Xserver 
++
++According to Thomas, it really is that difficult to install new fonts
++in plain XWindows.  However, he says that if you are using KDE (for
++example) it's a lot easier -- but I'm not sure if that applies when
++dealing with cygwin-KDE from the cygports project.  Hopefully so...
++  
++
++INPUT:
++------
++You'll need to modify your ~/.inputrc file to ensure that the following
++entries are NOT commented-out:
++
++set meta-flag on     # synonym for input-meta, allow 8-bit input
++set output-meta on   # to show 8-bit characters
++set convert-meta off # to show it as character, not octal
++  
++U.S. users will need to ensure that the US-International keyboard
++layout is installed, and switch to it.  In my case, I made it the
++default, and then restarted my XServer.  There's also some xmodmap
++commands that will be necessary, but I'll cover that in the XServer
++section. Alternatively, you can use ISO14755 input mode provided
++by rxvt-unicode:
++  Hold down the CTRL and SHIFT keys, and type in the unicode
++  code point you want.  For instance, CTRL-SHIFT 20ac should
++  cause the Euro symbol to be entered.
++
++
++NOTE: Is the stuff below still true, in the cygwin-1.7.x and
++xorg-server-1.7.x era?
++
++XSERVER:
++--------
++X      In its default configuration the cygwin XServer doesn't
++X      understand the Alt-Gr key, nor any dead keys (which DO, in fact,
++X      operate as expected in "regular" windows apps once you've activated
++X      the US-International keyboard).
++X  
++X      I believe "The Right Way" to set this up is to use the setxkbmap 
++X      command.  In my case:
++X         setxkbmap -model presario -layout us -variant intl
++X      Or, add someting similar to the following to your XWin invokation
++X      in startxwin.bat/.sh:
++X         -xkbmodel presario -xkblayout us -xkbvariant intl
++X  
++X      See /etc/X11/xkb/rules/xorg.list for all the various possibilities.
++X  
++X      Note that the extended characters will not appear properly on the
++X      terminal command line: for instance, AltGr-5 (which should produce 
++X      the Euro symbol '€') instead looks like \342\202\254 at the bash
++X      prompt -- these look like 12 characters, but there are really only
++X      three, because the whole string can be deleted by pressing backspace
++X      just three times.  In mined (a UTF-8 aware editor), pressing AltGr-5
++X      does produce the Euro symbol.  In vi, the correct byte sequence for
++X      the unicode Euro symbol is inserted, but vi can't display multibyte
++X      character sets, so it doesn't look like the Euro at all. 
++X  
++X      Note that the UTF-8 encoded Euro symbol '€' really is three bytes
++X      long, as described in the following references:
++X          http://gedcom-parse.sourceforge.net/doc/encoding.html
++X          http://www.cl.cam.ac.uk/%7Emgk25/unicode.html#utf-8
++X  
++X  From Thomas Wolff's release notes:
++X  
++X      ## ignore ## + Since bash, probably through readline, is not aware of UTF-8, 
++X      ## ignore ##   it may send partial characters to the terminal (splitting a UTF-8 
++X      ## ignore ##   sequence into bytes where it thinks the line ends).
++X      ## ignore ##   This results in wrong display but is not otherwise harmful.
++X      ## ignore ##   This does not affect the UTF-8 support of rxvt established with this 
++X      ## ignore ##   patch, however, as can be checked with other shells (ash, Interix 
++X      ## ignore ##   ksh, cmd.exe) and with a UTF-8-aware application (mined) where 
++X      ## ignore ##   UTF-8 input works fine.
++X      ## ignore ##   [csw:] so, apparently readline should be compiled with UTF-8 support.
++X      ## ignore ##          I don't know if that is even possible.
++X  
++X      + The wchar_t type on cygwin is only "unsigned short", raising a minor 
++X        problem with handling Unicode characters beyond 16 bit; my patch 
++X        maps the output to the Unicode replacement character U+FFFD.
++X        Substituting a sufficiently wide type might work but would require 
++X        more subtle modifications to the code.
++X        [csw:] This would probably require that the next major (backwards-
++X               incompatible) cygwin DLL (2.0 or somesuch) define wchar_t
++X               as unsigned long (32bits).
++X  
++X    Note that this patch does NOT mean that cygwin now supports unicode.
++X    It does not -- at least until cygwin-1.7 is released.  It simply means
++X    that rxvt-unicode now employs custom code to handle unicode (UTF-8 only)
++X    in a limited way, independently of cygwin's character-handling code.  You
++X    still need a cooperating shell and command-line tools, and to take care to
++X    set environment variables properly *BEFORE* launching rxvt-unicode. E.g.
++X       LC_CTYPE=en_US.UTF-8 urxvt-X.exe
++X    Unfortunately, many people use run.exe to start rxvt-unicode.  run.exe
++X    has no facilities to enable this sort of usage; it only knows how to 
++X    set the PATH environment variable before launching its target.  However,
++X    the run2 application does support setting environment variables before
++X    launching the target.
++X  
++X    Another alternative is to use something like the following in the 
++X    Windows Shortcut's target:
++X      C:\cygwin\bin\run.exe C:\cygwin\bin\bash.exe -c "LC_ALL=en_US.UTF-8 urxvt-X.exe -fn 10x20 -ls"
++X  
++X    Note that you CAN use multiple urxvtc-X.exe's (the clients) in different 
++X    locale modes (non-unicode vs. UTF-8) -- the setting is controlled by the
++X    way urxvtc-X.exe (the client) was started, NOT by the way urxvtd-X.exe
++X    (the daemon) was started.
++X  
++X    This feature is still experimental.  It is not expected to work properly in 
++X    all cases.  Your Xserver must provide unicode fonts (and you should tell
++X    rxvt-unicode to use them).  Your input settings must be configured, both
++X    in Windows, in readline (.inputrc), and in X.  I've tried to put together 
++X    some suggestions above, but I'm really uninformed about a lot of these
++X    issues.  Perhaps a nicely-worded question on the cygwin mailing list may
++X    elicit some suggestions from people more knowledgeable about unicode than
++X    your humble rxvt maintainer.
++==========================================================================
++
++----------  rxvt-unicode-X-9.15-2 -- 25 Sep 2012 -----------
++* Removed buffer-on-clear patch as it was causing issues with screen.
++  http://cygwin.com/ml/cygwin/2012-09/msg00012.html Reported by David
++  Stark.
++
++----------  rxvt-unicode-X-9.15-1 -- 29 Aug 2012 -----------
++* Updated to latest upstream release
++* Imported fixes from Debian and Gentoo
++* Built against gdk_pixbuf rather than libAfterImage
++* NOTE: upstream default TERM is 'rxvt-unicode-256color' which is too long
++  for most 'screen' implementations.  Add the following to your
++  /etc/app-defaults/URxvt or ~/.Xdefaults file if this is a problem for you:
++     urxvt*termName: rxvt-unicode256
++  and in .screenrc (in the appropriate section)
++     term rxvt-unicode256
++* Includes these patches from gentoo:
++  + buffer-on-clear: "Please note that, although this works well for most
++    prompts, there have been cases with fancy prompts, like bug #397829
++    where it caused issues. Proceed with caution."
++    https://bugs.gentoo.org/show_bug.cgi?id=397829
++  + secondary-wheel: "This allows you to scroll in secondary screens (like
++    mutt's message list/view) using the mouse wheel. To actually enable the
++    feature you have to add"
++      URxvt*secondaryWheel: true"
++    in your /etc/app-defaults/URxvt or ~/.Xdefaults file.
++* Link using g++ to avoid abort() everything an internal exception is thrown.
++
++----------  rxvt-unicode-X-9.07-2 -- unreleased-----------
++* Rebuilt against modern libraries, as previous cygperl5_10.dll
++  is no longer available.
++* Added -debuginfo package.
++
++----------  rxvt-unicode-X-9.07-1 -- 2010 Jan 05 -----------
++* Update to latest upstream release
++* Include various fixes from Debian and Gentoo
++* Include 256 color support
++* Enable perl support. Use the -pe option to load extensions.
++  + For fun, add this to your /etc/X11/app-defaults/URxvt file:
++    URxvt.perl-ext-common:default,tabbed
++* Use 8byte ("unicode3") storage per cell rather than 6byte (otherwise,
++  rxvt-unicode (ab)uses the private use encodings, in ways that may 
++  be incompatible with cygwin's abuse of them).
++* Use libAfterImage for most bitmap support.
++* Removed hide_console code. Use run or run2, like everybody else.
++
++----------  rxvt-unicode-X-7.7-20 -- 2009 May 03 -----------
++* Fork for cygwin-1.7 development
++* NOTE: this version still uses the hacked-in utf8 support
++  provided via patches from Thomas Wolff. It does NOT use
++  the new unicode support provide by cygwin-1.7. That will
++  come with the (future) rxvt-unicode-8.x releases.
++* Build system fixes to accomodate changes in coreutils
++  for cygwin-1.7 (mostly, be more careful about .exe suffixes)
++
++----------  rxvt-unicode-X-7.7-7 -- 2009 May 03 -----------
++* Recompile against latest (modular) X libraries
++* Update postinstall/preremove scripts
++* Update to build with stock cygport
++* Use cygutils to create Start Menu shortcuts for 
++    urxvtc-X (client)
++    urxvt-X  (standalone)
++  There is no shortcut for the deamon urxvtd-X; you're
++  better off adding that to your X server startup script.
++
++----------  rxvt-unicode-X-7.7-6 -- 20060105 -----------
++* Package bugfix
++
++----------  rxvt-unicode-X-7.7-5 -- 20061217 -----------
++* Switch to cygport build framework
++* Includes patch from Ken Healy to enable support for building rxvt-unicode
++  with perl integration.  HOWEVER, this release does not actually build
++  with --enable-perl; doing so would cause rxvt-unicode-X to require:
++  perl.  I don't want to do that -- but it should be relatively easy for
++  interested users to download this -src package, modify the .cygport file
++  to configure using --enable-perl, and rebuild.  Note this warning
++    http://www.cygwin.com/ml/cygwin/2006-10/msg00333.html
++  concerning perl-5.8.7-5 and /usr/lib/perl5/5.8/cygwin/Config_heavy.pl
++* Includes patch from Thomas Wolff to enable partial unicode support
++  on cygwin.  Updated notes concerning the unicode functionality appear
++  in the previous section.
++
++----------  rxvt-unicode-X-7.7-4 -- 20060316 -----------
++* turned on --enable-selectionscrolling option
++* imported "smart" hide_console code from rxvt-20050409's libW11 wrapper.
++  This smart code does not hide the console if urxvt is invoked via a 
++  bash-in-cmd.exe shell.  In -3, invoking 'rxvt' from the command line
++  in such a shell permanently hid the user's existing session.  That's bad.
++* However, this means we will need a different solution for when we
++  invoke urxvt via a script and WANT the script's console hidden.
++  See http://cygwin.com/ml/cygwin/2006-05/msg00403.html
++* There is a patch in testing to provide partial unicode support
++  (thanks to Thomas Wolff) but it is not included in this version.
++
++----------  rxvt-unicode-X-7.7-3 -- 20050316 -----------
++* removed checkX program; it got its own package.  Italic and Bold
++  now work properly.
++
++----------  rxvt-unicode-X-7.7-2 -- 20050316 -----------
++* added checkX program
++
++----------  rxvt-unicode-X-7.7-1 -- 20050305 -----------
++Initial release: with xft support, but no perl.  Italic and BoldItalic fonts
++  do not appear to work, and unicode is not actually supported because of 
++  deficiencies in cygwin's local support.
++
++  Use 'URxvt*' prefix in ~/.Xdefaults for settings specific to rxvt-unicode-x
++  Use 'Rxvt*' prefix for settings common between rxvt and rxvt-unicode-x.
++  (Capitalization is important: 'URxvt' means this application class, 
++  regardless of whether you've renamed the binary -- which we have; our binary
++  is called urxvt-x.  Lower case means 'name of the actual application file 
++  on disk, after resolving all symlinks')
++
++Configuration:
++  --enable-shared --enable-utmp --enable-wtmp --enable-lastlog \
++  --enable-xft --enable-font-styles --disable-xim --enable-combining \
++  --enable-fallback=Rxvt --with-res-name=urxvt --with-res-class=URxvt \
++  --program-suffix=-X \
++  --enable-xpm-background  --enable-menubar --enable-rxvt-scroll \
++  --enable-next-scroll --enable-xterm-scroll --enable-plain-scroll \
++  --enable-transparency --enable-tinting --enable-fading \
++  --enable-frills --enable-smart-resize --enable-pointer-blank \
++  --enable-mousewheel --enable-slipwheeling --enable-keepscrolling \
++  --enable-old-selection --enable-selectionscrolling --disable-perl \
++  --with-xpm-includes=/usr/X11R6/include --with-xpm-library=/usr/X11R6/lib \
++  --x-libraries=/usr/X11R6/lib 
++
++
++---------- Customizations ---------------------------
++
++oooooooooooooooooooaoooooooooo
++~/.Xdefaults
++
++Here are my settings for ~/.Xdefaults. I specify italic and boldItalic,
++which you can demonstrate using the commands below:
++    BoldItalic:
++    tput sitm ; tput bold ;  echo 'hello, world!' ; tput sgr0
++    
++    Italic:
++    tput sitm ; echo 'hello, world!' ; tput ritm
++    
++    Bold:
++    tput bold ; echo 'hello, world!' ; tput sgr0
++    
++    Fun prompt:
++      ITb=`tput sitm`
++      BDb=`tput bold`
++      NRM=`tput sgr0`
++      GRN="\[\e[32m\]"
++      YLW="\[\e[33m\]"
++      PS1="\[\e]0;\w\a\]\n$ITb$BDb$GRN\u$NRM@$GRN\h $ITb$YLW\w$NRM\n\$ "
++    Gives: GreenBoldItalicUserName Def@ GreenNormalMachineName YellowItalicPath
++
++
++! ---------[ urxvt ] ---------
++URxvt*background: #000040
++URxvt*foreground: #ffffbf
++URxvt*scrollBar:	true
++URxvt*scrollBar_right:	true
++URxvt*font:		xft:Bitstream Vera Sans Mono:size=16:medium:roman:antialias=true
++URxvt*boldFont:		xft:Bitstream Vera Sans Mono:size=16:bold:roman:antialias=true
++URxvt*italicFont:	xft:Bitstream Vera Sans Mono:size=16:medium:italic:autohint=true:antialias=true
++URxvt*boldItalicFont:	xft:Bitstream Vera Sans Mono:size=16:bold:italic:autohint=true:antialias=true
++URxvt*fading:		60
++URxvt*tintColor:	white
++URxvt*shading:		20
++URxvt*inheritPixmap:	true
++!URxvt*colorBD:		green
++!URxvt*colorIT:		grey
++
++
++
++oooooooooooooooooooaoooooooooo
++Background Pixmap (Psuedo-Transparency)
++
++Note that inheritPixmap (-ip or -tr command line option) does work
++with the cygwin-X server, even in -multiwindow mode.  However, by
++default the (usually invisible) background pixmap is the ugly grey
++hash.  You can set the background pixmap using the xsri program.
++The commandline I use in my .startxwinrc file, is below: it's a neat
++effect -- a "desktop background" that is ONLY visible inside the
++rxvt-unicode-X windows, and unrelated to the Windows "desktop
++background".  Or, you could use the same picture for "both" desktops...
++
++xsri --center-x --center-y --scale-height=100 --scale-width=100 --keep-aspect \
++  --emblem=<full cygwin path to image>
++
++(xsri does not stay resident; it exits as soon as it finishes its short task.  
++So there's no need to use run.exe with it)
++
++
++oooooooooooooooooooaoooooooooo
++Client-Server
++
++The urxvtd-X server can be started in your X startup script, and then you can 
++use the urxvtc-X client to instruct the server to open a new window -- after
++which the client exits.  Thus, all client windows are actually part of the
++same process.  This has two effects:
++  (1) lower resource usage and shorter startup time
++  (2) possible instability -- if the server dies, ALL clients die not just
++      one.  Of course, that's ALSO true if the *X* server dies.
++
++In .startxwinrc
++run urxvtd-X.exe -q -f -o
++
++NOTE: using 'run' above requires run-1.1.10 or above.  Otherwise,
++      the console window in which startxwin.bat is executing will
++      remain visible and cannot be closed (without killing urxvt-d).
++
++Cygwin port maintained by: Charles Wilson <cygwin@cygwin.com>
++Please address all questions to the Cygwin mailing list at <cygwin@cygwin.com>
+--- origsrc/rxvt-unicode-9.15/CYGWIN-PATCHES/rxvt-unicode-X.hint	1969-12-31 19:00:00.000000000 -0500
++++ src/rxvt-unicode-9.15/CYGWIN-PATCHES/rxvt-unicode-X.hint	2012-12-03 23:21:01.651317700 -0500
+@@ -0,0 +1,7 @@
++sdesc: "An improved version of rxvt requiring an Xserver."
++ldesc: "rxvt-unicode-X is an X-based version of rxvt-unicode, which is an
++improved version of the venerable rxvt terminal emulator.  The upstream
++codebase supports unicode as well as possessing numerous bugfixes
++over the unmaintained rxvt code."
++category: Shells
++requires: rxvt-unicode-common libAfterImage0 libgdk_pixbuf2.0_0 libfontconfig1 libX11_6 libXft2 libXrender1 perl libstdc++6 libgcc1 font-bitstream-vera-ttf cygutils diffutils run run2 bash coreutils
+--- origsrc/rxvt-unicode-9.15/CYGWIN-PATCHES/rxvt-unicode-X.postinstall	1969-12-31 19:00:00.000000000 -0500
++++ src/rxvt-unicode-9.15/CYGWIN-PATCHES/rxvt-unicode-X.postinstall	2012-12-03 23:21:01.655317900 -0500
+@@ -0,0 +1,46 @@
++#!/bin/bash
++PATH=/bin
++export PATH
++prefix=/usr
++bindir=${prefix}/bin
++sbindir=${prefix}/sbin
++
++if [ ! -f /etc/X11/app-defaults/URxvt ]
++then
++    /usr/bin/mkdir -p /etc/X11/app-defaults
++    /usr/bin/cp /etc/defaults/etc/X11/app-defaults/URxvt /etc/X11/app-defaults/URxvt
++fi
++
++################################################################
++# Shortcuts
++################################################################
++do_mkshortcut() {
++    AP=$1
++    SM=$(/usr/bin/cygpath $AP)
++    /usr/bin/mkdir -p "$SM/Cygwin" && \
++        /usr/bin/rm -f "$SM/Cygwin/rxvt-unicode-xC.lnk" && \
++    /usr/bin/mkshortcut $AP -n "Cygwin/rxvt-unicode-xC" \
++        -d "Cygwin RXVT Unicode Client (X11)" \
++        -w /usr/bin -i /usr/bin/cygicons-0.dll -j 9 \
++        -a '-display 127.0.0.1:0.0 -ls -e /bin/bash --login' \
++        /usr/bin/urxvtc-X.exe && \
++    /usr/bin/chmod go+r "$SM/Cygwin/rxvt-unicode-xC.lnk" && \
++        /usr/bin/rm -f "$SM/Cygwin/rxvt-unicode-xS.lnk" && \
++    /usr/bin/mkshortcut $AP -n "Cygwin/rxvt-unicode-xS" \
++        -d "Cygwin RXVT Unicode Standalone (X11)" \
++        -w /usr/bin -i /usr/bin/cygicons-0.dll -j 6 \
++        -a '-display 127.0.0.1:0.0 -ls -e /bin/bash --login' \
++        /usr/bin/urxvt-X.exe && \
++    /usr/bin/chmod go+r "$SM/Cygwin/rxvt-unicode-xS.lnk"
++}
++do_mkshortcut -AP || do_mkshortcut -P
++
++################################################################
++# Alternatives (eventually to be used in conjunction with
++# additional versions of rxvt-unicode).
++################################################################
++${sbindir}/update-alternatives \
++        --install ${bindir}/urxvt   urxvt   ${bindir}/urxvt-X.exe   30 \
++        --slave   ${bindir}/urxvtc  urxvtc  ${bindir}/urxvtc-X.exe \
++        --slave   ${bindir}/urxvtd  urxvtd  ${bindir}/urxvtd-X.exe
++
+--- origsrc/rxvt-unicode-9.15/CYGWIN-PATCHES/rxvt-unicode-X.preremove	1969-12-31 19:00:00.000000000 -0500
++++ src/rxvt-unicode-9.15/CYGWIN-PATCHES/rxvt-unicode-X.preremove	2012-12-03 23:21:01.659318200 -0500
+@@ -0,0 +1,28 @@
++#!/bin/bash
++PATH=/bin
++export PATH
++prefix=/usr
++sbindir=${prefix}/sbin
++bindir=${prefix}/bin
++
++if [ -f /etc/X11/app-defaults/URxvt ] && cmp -s /etc/defaults/etc/X11/app-defaults/URxvt /etc/X11/app-defaults/URxvt
++then
++    rm /etc/X11/app-defaults/URxvt
++fi
++
++do_rmshortcut() {
++    AP=$1
++    if [ -e "$(cygpath $AP)/Cygwin/rxvt-unicode-xC.lnk" ]
++    then
++        rm -f "$(cygpath $AP)/Cygwin/rxvt-unicode-xC.lnk" 
++        rm -f "$(cygpath $AP)/Cygwin/rxvt-unicode-xS.lnk"
++        rmdir --ignore-fail-on-non-empty "$(cygpath $AP)/Cygwin"
++        true
++    else
++        false
++    fi
++}
++do_rmshortcut -AP || do_rmshortcut -P
++
++${sbindir}/update-alternatives --remove urxvt ${bindir}/urxvt-X.exe
++
+--- origsrc/rxvt-unicode-9.15/CYGWIN-PATCHES/rxvt-unicode-common.README	1969-12-31 19:00:00.000000000 -0500
++++ src/rxvt-unicode-9.15/CYGWIN-PATCHES/rxvt-unicode-common.README	2012-12-03 23:27:01.126878500 -0500
+@@ -0,0 +1,37 @@
++rxvt-unicode-common
++========================================================================
++Provides files shared between various flavors of rxvt-unicode.
++
++Runtime requirements:
++  cygwin-1.7.17-1
++  ncurses
++  coreutils
++  grep
++
++Build requirements:
++  n/a - see rxvt-unicode-X documentation
++
++Canonical homepage:
++  http://software.schmorp.de/pkg/rxvt-unicode.html
++
++Canonical download:
++  http://dist.schmorp.de/rxvt-unicode/
++
++License:
++  GPL
++
++Language:
++  C, C++, Perl
++
++========================================================================
++
++Build instructions:
++  n/a - see rxvt-unicode-X documentation
++
++========================================================================
++
++For more information about this package, see the upstream documentation in
++/usr/share/doc/rxvt-unicode/
++
++Cygwin port maintained by: Charles Wilson <cygwin@cygwin.com>
++
+--- origsrc/rxvt-unicode-9.15/CYGWIN-PATCHES/rxvt-unicode-common.hint	1969-12-31 19:00:00.000000000 -0500
++++ src/rxvt-unicode-9.15/CYGWIN-PATCHES/rxvt-unicode-common.hint	2012-12-03 23:21:37.805385600 -0500
+@@ -0,0 +1,8 @@
++sdesc: "An improved version of rxvt requiring an Xserver."
++ldesc: "rxvt-unicode-X is an X-based version of rxvt-unicode, which is an
++improved version of the venerable rxvt terminal emulator.  The upstream
++codebase supports unicode as well as possessing numerous bugfixes
++over the unmaintained rxvt code"
++category: Shells
++external-source: rxvt-unicode-X
++requires: bash grep gawk sed ncurses
+--- origsrc/rxvt-unicode-9.15/CYGWIN-PATCHES/rxvt-unicode-common.postinstall	1969-12-31 19:00:00.000000000 -0500
++++ src/rxvt-unicode-9.15/CYGWIN-PATCHES/rxvt-unicode-common.postinstall	2012-12-03 23:21:01.671318800 -0500
+@@ -0,0 +1,47 @@
++#!/bin/bash
++PATH=/bin
++export PATH
++
++D=/usr/share/doc/rxvt-unicode/terminfo
++TERMINFO_FILE=${D}/rxvt-unicode.terminfo
++TERMCAP_FILE=${D}/rxvt-unicode.termcap
++
++if [ -x "/usr/bin/tic.exe" -a -e ${TERMINFO_FILE} ]
++then
++  /usr/bin/tic.exe ${TERMINFO_FILE}
++fi
++if [ -x "/usr/bin/tic0.exe" -a -e ${TERMINFO_FILE} ]
++then
++  /usr/bin/tic0.exe ${TERMINFO_FILE}
++fi
++
++if [ -e /etc/termcap ] ; then
++  if grep -E '^rxvt-unicode\|' /etc/termcap >/dev/null 2>&1 ; then
++    # remove existing (out of date) entry
++    cp /etc/termcap /etc/termcap.rxvtunicode.backup
++    cat /etc/termcap | awk 'BEGIN{entryfound=0}{
++      if ($0 ~ /^rxvt-unicode/) {
++        entryfound=1
++      }
++      else if ($0 ~/^[^\t]/) {
++        entryfound=0
++      }
++      if (!entryfound) {
++        print $0
++      }
++    }' > /etc/termcap.rxvtunicode.new && \
++    mv /etc/termcap.rxvtunicode.new /etc/termcap
++  fi 
++  cat ${TERMCAP_FILE} >> /etc/termcap
++  cat >>/etc/termcap <<EOF
++rxvt-unicode256|rxvt-unicode terminal (X Window System):\\
++	:tc=rxvt-unicode-256color:
++EOF
++else
++  cat ${TERMCAP_FILE} > /etc/termcap
++  cat >>/etc/termcap <<EOF
++rxvt-unicode256|rxvt-unicode terminal (X Window System):\\
++	:tc=rxvt-unicode-256color:
++EOF
++fi
++

@@ -1,0 +1,140 @@
+NAME="rxvt-unicode"
+VERSION=9.15
+RELEASE=2
+DESCRIPTION="An improved version of rxvt (Xserver required)"
+HOMEPAGE="http://software.schmorp.de/pkg/rxvt-unicode.html"
+SRC_URI="http://dist.schmorp.de/rxvt-unicode/${NAME}-${VERSION}.tar.bz2"
+DEBIAN=" http://patch-tracker.debian.org/patch/series/dl/"
+GENTOO="http://sources.gentoo.org/viewcvs.py/*checkout*/gentoo-x86/x11-terms/"
+
+PATCH_URI="
+	${DEBIAN}${NAME}/9.15-2/01_app-defaults.diff
+	${DEBIAN}${NAME}/9.15-2/07_rgb_location.diff
+	${DEBIAN}${NAME}/9.15-2/11_fix_lexgrog.diff
+	${DEBIAN}${NAME}/9.15-2/12_hyphen_minus_sign.diff
+	${GENTOO}${NAME}/files/rxvt-unicode-9.06-case-insensitive-fs.patch 
+	${GENTOO}${NAME}/files/rxvt-unicode-9.06-no-urgency-if-focused.diff 
+	${GENTOO}${NAME}/files/rxvt-unicode-9.06-popups-hangs.patch 
+	${GENTOO}${NAME}/files/rxvt-unicode-9.05_no-MOTIF-WM-INFO.patch 
+	${GENTOO}${NAME}/files/rxvt-unicode-9.14-secondary-wheel.patch 
+	${GENTOO}${NAME}/files/rxvt-unicode-9.06-font-width.patch 
+"
+#	${GENTOO}${NAME}/files/rxvt-unicode-9.14-clear.patch
+
+# dropped by debian as of 9.10-1 2011-03-11
+# http://packages.debian.org/changelogs/pool/main/r/rxvt-unicode/rxvt-unicode_9.15-2/changelog
+#${DEBIAN}${NAME}/9.06-3/src/scrollbar-xterm.C
+#${DEBIAN}${NAME}/9.06-3/src/perl/selection
+	
+PKG_NAMES="${PN} ${NAME}-common"
+PKG_HINTS="${PN} ${NAME}-common"
+PKG_CONTENTS[0]="usr/bin usr/share/doc/Cygwin/${PN}.README etc/postinstall/${PN}.sh etc/preremove/${PN}.sh etc/defaults/etc/X11/app-defaults/URxvt"
+PKG_CONTENTS[1]="etc/postinstall/${NAME}-common.sh usr/share/doc/${NAME} usr/share/doc/Cygwin/${NAME}-common.README usr/lib/urxvt usr/share/man"
+
+CYGPORT_USE_UNSTABLE_API=1
+src_unpack_hook() {
+        cd ${origsrcdir}/${SRC_DIR}
+	sed -i \
+		-e 's/RXVT_BASENAME = "rxvt"/RXVT_BASENAME = "urxvt"/' \
+		doc/rxvt-tabbed
+}
+
+src_compile() {
+	cd ${S}
+	cygautoreconf
+
+	cd ${B}
+
+	# cygwin's utmpx.h ought to include
+	#  #define WTMPX_FILE _PATH_WTMP
+	# just like it does for utmpx.
+	export pt_cv_path_wtmpx="/var/log/wtmp"
+
+	# Force linking with g++, rather than gcc -lsupc++ (Which
+	# doesn't work).
+	export ru_cv_prog_linker='$(CXX)'
+
+	cygconf \
+		--enable-256-color \
+		--enable-unicode3 \
+		--enable-combining \
+		--enable-xft \
+		--enable-font-styles \
+		--enable-pixbuf \
+		--enable-startup-notification \
+		--enable-transparency \
+		--enable-fading \
+		--enable-rxvt-scroll \
+		--enable-next-scroll \
+		--enable-xterm-scroll \
+		--enable-perl \
+		--enable-xim \
+		--enable-fallback=Rxvt \
+		--enable-iso14755 \
+		--enable-frills \
+		--enable-keepscrolling \
+		--enable-selectionscrolling \
+		--enable-mousewheel \
+		--enable-slipwheeling \
+		--enable-smart-resize \
+		--enable-text-blink \
+		--enable-pointer-blank \
+		--enable-utmp \
+		--enable-wtmp \
+		--enable-lastlog \
+		--with-codesets=all \
+		--with-res-name=urxvt \
+		--with-res-class=URxvt \
+		--program-prefix=
+
+	cygmake
+}
+
+
+src_test() {
+	cd ${B}
+	make -j1 check
+}
+
+DOCS="doc/README.xvt doc/changes.txt doc/embed doc/embed-tk
+      doc/pty-fd doc/rxvt-tabbed doc/*.txt doc/*.pod 
+      Changes COPYING README.FAQ"
+DIFF_EXCLUDES="rxvtperl.3.pod rxvtperl.3.tbl rxvt.1.man.in rxvt.1.tbl rxvtc.1.man.in rxvtc.1.tbl rxvt.7.man.in rxvt.7.tbl"
+src_install() {
+	cd ${B}
+	cyginstall -j1
+
+	cd ${S}
+	insinto /etc/defaults/etc/X11/app-defaults
+	newins ${C}/URxvt.Xdefaults URxvt
+
+	docinto /${NAME}
+	dodoc ${default_docs} ${DOCS};
+	for html in ${HTMLDOCS}
+	do
+		docinto /${NAME}/html;
+		dodoc ${html};
+	done
+	docinto /${NAME}/terminfo
+	dodoc doc/etc/${NAME}.terminfo
+	dodoc doc/etc/${NAME}.termcap
+
+	# terminfo will be handled by postinstall
+	if [ -f ${D}/usr/share/terminfo/72/rxvt-unicode ]
+	then
+		rm -f ${D}/usr/share/terminfo/72/rxvt-unicode-256color
+		rm -f ${D}/usr/share/terminfo/72/rxvt-unicode
+		rmdir ${D}/usr/share/terminfo/72
+	fi
+	if [ -f ${D}/usr/share/terminfo/r/rxvt-unicode ]
+	then
+		rm -f ${D}/usr/share/terminfo/r/rxvt-unicode-256color
+		rm -f ${D}/usr/share/terminfo/r/rxvt-unicode
+		rmdir ${D}/usr/share/terminfo/r
+		rmdir ${D}/usr/share/terminfo
+	fi
+	if [ -d ${D}/usr/share/terminfo ]
+	then
+		rmdir ${D}/usr/share/terminfo
+	fi
+}

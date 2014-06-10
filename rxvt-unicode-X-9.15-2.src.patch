@@ -1,0 +1,248 @@
+--- origsrc/rxvt-unicode-9.15/Makefile.in	2012-12-03 23:21:00.031225000 -0500
++++ src/rxvt-unicode-9.15/Makefile.in	2012-12-03 23:21:02.051340600 -0500
+@@ -8,6 +8,7 @@ prefix = @prefix@
+ exec_prefix = @exec_prefix@
+ bindir = @bindir@
+ libdir = @libdir@
++datarootdir = @datarootdir@
+ man1dir = @mandir@/man1
+ man1ext = 1
+ man3dir = @mandir@/man3
+--- origsrc/rxvt-unicode-9.15/configure.ac	2012-01-21 07:36:35.000000000 -0500
++++ src/rxvt-unicode-9.15/configure.ac	2012-12-03 23:21:02.058341000 -0500
+@@ -8,6 +8,7 @@ AC_CONFIG_SRCDIR([src/feature.h])
+ AC_CONFIG_HEADER(config.h:config.h.in)
+ 
+ AC_CANONICAL_HOST
++AC_ARG_PROGRAM
+ 
+ dnl RXVT version
+ changequote(, )dnl
+@@ -33,11 +34,15 @@ AC_GNU_SOURCE
+ AC_ISC_POSIX
+ AC_LANG(C++)
+ 
+-LINKER="$CXX"
+ dnl check whether we can link with gcc -lsupc++
++dnl however, merely linking is not dispositive; on cygwin linking works
++dnl but executing a program that throws exceptions, while linking only
++dnl with libsubpc++ results in an abort.  So, use cache variables to
++dnl allow this detection scheme to be overridden when required.
++LINKER="$CXX"
+ if test x$GCC = xyes && test x$GXX = xyes; then
+    dnl FreeBSD (at least up to 5.3) has a broken GCC, workaround it
+-   AC_MSG_CHECKING([for working libsupc++])
++   AC_CACHE_CHECK([for working libsubpc++], [ru_cv_prog_linker],[dnl
+    save_CXX="$CXX"
+    save_LIBS="$LIBS"
+    CXX="$CC"
+@@ -45,13 +50,15 @@ if test x$GCC = xyes && test x$GXX = xye
+    AC_LINK_IFELSE(
+       [AC_LANG_PROGRAM([struct test { }; void f() try { throw new test; } catch (...) { throw; }],[])],
+       [AC_MSG_RESULT(ok)
+-       LINKER="$CC"],
++       ru_cv_prog_linker="$CC"],
+       [
+          AC_MSG_RESULT([no, making everything bigger and slower])
+          LIBS="$save_LIBS"
++         ru_cv_prog_linker="$CXX"
+       ]
+    )
+-   CXX="$save_CXX"
++   CXX="$save_CXX"])
++   LINKER=$ru_cv_prog_linker
+ fi
+ AC_SUBST(LINKER,[$LINKER])
+ 
+--- origsrc/rxvt-unicode-9.15/doc/Makefile.in	2011-12-27 21:31:26.000000000 -0500
++++ src/rxvt-unicode-9.15/doc/Makefile.in	2012-12-03 23:21:02.064341300 -0500
+@@ -8,6 +8,7 @@ prefix = @prefix@
+ exec_prefix = @exec_prefix@
+ bindir = @bindir@
+ libdir = @libdir@
++datarootdir = @datarootdir@
+ man1dir = @mandir@/man1
+ man1ext = 1
+ man3dir = @mandir@/man3
+@@ -35,44 +36,54 @@ SEDREPLACE = -e 's%@@RXVT_VERSION@@%$(VE
+ 
+ POD2MAN = pod2man -n @@RXVT_NAME@@ -r @@RXVT_VERSION@@ -q\" -c "RXVT-UNICODE"
+ 
+-all:
++all: rxvt.1.man rxvtc.1.man rxvtd.1.man rxvt.7.man rxvtperl.3.man
++
++rxvt.1.man: rxvt.1.man.in
+ 	sed $(SEDREPLACE) < $(srcdir)/rxvt.1.man.in  >rxvt.1.man
++
++rxvtc.1.man: rxvtc.1.man.in
+ 	sed $(SEDREPLACE) < $(srcdir)/rxvtc.1.man.in >rxvtc.1.man
++
++rxvtd.1.man: rxvtd.1.man.in
+ 	sed $(SEDREPLACE) < $(srcdir)/rxvtd.1.man.in >rxvtd.1.man
++
++rxvt.7.man: rxvt.7.man.in
+ 	sed $(SEDREPLACE) < $(srcdir)/rxvt.7.man.in  >rxvt.7.man
+-@IF_PERL@	sed $(SEDREPLACE) < $(srcdir)/rxvtperl.3.man.in >rxvtperl.3.man
++
++rxvtperl.3.man: rxvtperl.3.man.in
++	sed $(SEDREPLACE) < $(srcdir)/rxvtperl.3.man.in >rxvtperl.3.man
+ 
+ .INTERMEDIATE: rxvtperl.3.pod rxvt.7.tbl
+ 
+-rxvtperl.3.pod: ../src/urxvt.pm
+-	cp $< $@
++rxvtperl.3.pod: $(srcdir)/../src/urxvt.pm
++	cp $< $(srcdir)/$(@F)
+ 
+ %.tbl: %.pod
+-	$(srcdir)/podtbl <$< >$@
++	$(srcdir)/podtbl <$(srcdir)/$(<F) >$(srcdir)/$(@F)
+ 
+ %.1.man.in: %.1.tbl
+-	$(POD2MAN) -s1 <$< >$@
++	$(POD2MAN) -s1 <$(srcdir)/$(<F) >$(srcdir)/$(@F)
+ 
+ %.3.man.in: %.3.tbl
+-	$(POD2MAN) -s3 <$< >$@
++	$(POD2MAN) -s3 <$(srcdir)/$(<F) >$(srcdir)/$(@F)
+ 
+ %.7.man.in: %.7.tbl
+-	$(POD2MAN) -s7 <$< >$@
++	$(POD2MAN) -s7 <$(srcdir)/$(<F) >$(srcdir)/$(@F)
+ 
+ %.html: %.tbl
+-	sed $(SEDREPLACE) <$< | pod2xhtml --css http://res.tst.eu/pod.css >$@
++	sed $(SEDREPLACE) <$(srcdir)/$(<F) | pod2xhtml --css http://res.tst.eu/pod.css >$(srcdir)/$(@F)
+ 
+ %.txt: %.tbl
+-	sed $(SEDREPLACE) <$< | pod2text >$@
++	sed $(SEDREPLACE) <$(srcdir)/$(<F) | pod2text >$(srcdir)/$(@F)
+ 
+ ../README.configure: rxvt.7.tbl
+-	sed $(SEDREPLACE) <$< | podselect -section "CONFIGURE OPTIONS" | pod2text >$@
++	sed $(SEDREPLACE) <$(srcdir)/$(<F) | podselect -section "CONFIGURE OPTIONS" | pod2text >$(srcdir)/$(@F)
+ 
+ ../README.FAQ: rxvt.7.tbl
+-	sed $(SEDREPLACE) <$< | podselect -section "RXVT-UNICODE\/URXVT FREQUENTLY ASKED QUESTIONS" | pod2text >$@
++	sed $(SEDREPLACE) <$(srcdir)/$(<F) | podselect -section "RXVT-UNICODE\/URXVT FREQUENTLY ASKED QUESTIONS" | pod2text >$(srcdir)/$(@F)
+ 
+ $(srcdir)/etc/rxvt-unicode.termcap: $(srcdir)/etc/rxvt-unicode.terminfo
+-	tic -C $< >$@
++	tic -C $(srcdir)/$(<F) >$(srcdir)/$(@F)
+ 
+ tags allbin:
+ 
+--- origsrc/rxvt-unicode-9.15/doc/etc/rxvt-unicode.terminfo	2011-06-22 06:44:37.000000000 -0400
++++ src/rxvt-unicode-9.15/doc/etc/rxvt-unicode.terminfo	2012-12-03 23:21:02.069341600 -0500
+@@ -167,3 +167,8 @@ rxvt-unicode-256color|rxvt-unicode termi
+ 	colors#256,
+ 	pairs#32767,
+ 	use=rxvt-unicode,
++
++rxvt-unicode256|rxvt-unicode terminal with 256 colors (X Window System),
++	colors#256,
++	pairs#32767,
++	use=rxvt-unicode,
+--- origsrc/rxvt-unicode-9.15/libptytty/src/ptytty_conf.h	2011-12-21 12:39:16.000000000 -0500
++++ src/rxvt-unicode-9.15/libptytty/src/ptytty_conf.h	2012-12-03 23:21:02.073341800 -0500
+@@ -18,7 +18,8 @@
+  * when running setuid/setgid. You need this when making it setuid/setgid.
+  */
+ #ifndef PTYTTY_HELPER
+-# define PTYTTY_HELPER 1
++/* can't send filedes over a socket on cygwin */
++# define PTYTTY_HELPER 0
+ #endif
+ 
+ /*
+--- origsrc/rxvt-unicode-9.15/src/Makefile.in	2012-01-21 07:43:39.000000000 -0500
++++ src/rxvt-unicode-9.15/src/Makefile.in	2012-12-03 23:21:02.079342200 -0500
+@@ -8,6 +8,7 @@ bindir = @bindir@
+ libdir = @libdir@
+ CXX = @CXX@
+ PERL = @PERL@
++EXEEXT = @EXEEXT@
+ INSTALL = @INSTALL@
+ INSTALL_PROGRAM = @INSTALL@ -m 755
+ INSTALL_DATA = @INSTALL@ -m 644
+@@ -39,9 +40,14 @@ COMMON = \
+ 
+ COMMON_DAEMON = rxvtdaemon.o
+ 
+-RXVT_BINNAME=$(DESTDIR)$(bindir)/$(RXVTNAME)$(EXEEXT)
+-RXVTC_BINNAME=$(DESTDIR)$(bindir)/$(RXVTNAME)c$(EXEEXT)
+-RXVTD_BINNAME=$(DESTDIR)$(bindir)/$(RXVTNAME)d$(EXEEXT)
++transform=@program_transform_name@
++RXVT_BASE_NOEXE := $(shell echo $(RXVTNAME)|sed 's/$(EXEEXT)$$//' )
++RXVT_BASENAME =`echo $(RXVT_BASE_NOEXE) |sed '$(transform)'`
++RXVTC_BASENAME=`echo $(RXVT_BASE_NOEXE)c|sed '$(transform)'`
++RXVTD_BASENAME=`echo $(RXVT_BASE_NOEXE)d|sed '$(transform)'`
++RXVT_BINNAME =$(DESTDIR)$(bindir)/$(RXVT_BASENAME)$(EXEEXT)
++RXVTC_BINNAME=$(DESTDIR)$(bindir)/$(RXVTC_BASENAME)$(EXEEXT)
++RXVTD_BINNAME=$(DESTDIR)$(bindir)/$(RXVTD_BASENAME)$(EXEEXT)
+ 
+ #
+ # Distribution variables
+@@ -54,17 +60,20 @@ RXVTD_BINNAME=$(DESTDIR)$(bindir)/$(RXVT
+ .C.o:
+ 	$(COMPILE) -c $<
+ 
++.c.o:
++	$(COMPILE) -c $<
++
+ #-------------------------------------------------------------------------
+ 
+ all: allbin
+ 
+-rxvt: rxvt.o $(COMMON)
++rxvt$(EXEEXT): rxvt.o $(COMMON)
+ 	$(LINK) -o $@ rxvt.o $(COMMON) $(LIBS) $(XLIB) $(PERLLIB)
+ 
+-rxvtd: rxvtd.o $(COMMON) $(COMMON_DAEMON)
++rxvtd$(EXEEXT): rxvtd.o $(COMMON) $(COMMON_DAEMON)
+ 	$(LINK) -o $@ rxvtd.o $(COMMON) $(COMMON_DAEMON) $(LIBS) $(XLIB) $(PERLLIB)
+ 
+-rxvtc: rxvtc.o $(COMMON_DAEMON) fdpass_wrapper.o
++rxvtc$(EXEEXT): rxvtc.o $(COMMON_DAEMON) fdpass_wrapper.o
+ 	$(LINK) -o $@ rxvtc.o $(COMMON_DAEMON) fdpass_wrapper.o $(LIBS)
+ 
+ #-------------------------------------------------------------------------
+@@ -77,12 +86,12 @@ tags: *.[Ch]
+ TAGS: *.[Ch]
+ 	etags $(EXUBERANT_OPTS) *.[Ch]
+ 
+-allbin: rxvt rxvtd rxvtc
++allbin: rxvt$(EXEEXT) rxvtd$(EXEEXT) rxvtc$(EXEEXT)
+ 
+ alldoc:
+ 
+ clean:
+-	rm -f rxvt rxvtc rxvtd perlxsi.c rxvtperl.C
++	rm -f rxvt$(EXEEXT) rxvtc$(EXEEXT) rxvtd$(EXEEXT) perlxsi.c rxvtperl.C
+ 	rm -f *.o
+ 
+ distclean: clean
+@@ -102,9 +111,9 @@ install-perl:
+ 
+ install-bin: allbin
+ 	$(INSTALL) -d $(DESTDIR)$(bindir)
+-	$(INSTALL_PROGRAM) rxvt  $(RXVT_BINNAME)
+-	$(INSTALL_PROGRAM) rxvtc $(RXVTC_BINNAME)
+-	$(INSTALL_PROGRAM) rxvtd $(RXVTD_BINNAME)
++	$(INSTALL_PROGRAM) rxvt$(EXEEXT)  $(RXVT_BINNAME)
++	$(INSTALL_PROGRAM) rxvtc$(EXEEXT) $(RXVTC_BINNAME)
++	$(INSTALL_PROGRAM) rxvtd$(EXEEXT) $(RXVTD_BINNAME)
+ 
+ install: install-bin install-perl
+ 
+--- origsrc/rxvt-unicode-9.15/src/feature.h	2012-01-01 22:57:35.000000000 -0500
++++ src/rxvt-unicode-9.15/src/feature.h	2012-12-03 23:21:02.084342500 -0500
+@@ -31,7 +31,7 @@
+ #endif
+ #ifndef XAPPLOADDIR
+ # define XAPPLOADDIR		X11LIBDIR "/app-defaults"
+-# define XAPPLOADDIRLOCALE	X11LIBDIR "/%s/app-defaults"
++# define XAPPLOADDIRLOCALE	X11LIBDIR "/locale/%s/app-defaults"
+ #endif
+ 
+ /*-----------------------SCREEN OPTIONS AND COLOURS---------------------*/
