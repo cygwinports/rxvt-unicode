@@ -1,0 +1,20 @@
+--- origsrc/rxvt-unicode-9.20/doc/Makefile.in	2012-11-06 14:54:10.000000000 -0600
++++ src/rxvt-unicode-9.20/doc/Makefile.in	2014-06-09 23:27:11.838775800 -0500
+@@ -8,6 +8,7 @@ prefix = @prefix@
+ exec_prefix = @exec_prefix@
+ bindir = @bindir@
+ libdir = @libdir@
++datadir = @datadir@
+ man1dir = @mandir@/man1
+ man1ext = 1
+ man3dir = @mandir@/man3
+@@ -96,7 +97,8 @@ install: all
+ 	$(INSTALL_DATA) rxvtc.1.man $(DESTDIR)$(man1dir)/$(RXVTNAME)c.$(man1ext)
+ 	$(INSTALL_DATA) rxvtd.1.man $(DESTDIR)$(man1dir)/$(RXVTNAME)d.$(man1ext)
+ 	$(INSTALL_DATA) rxvt.7.man  $(DESTDIR)$(man7dir)/$(RXVTNAME).$(man7ext)
+-	@TIC@ $(srcdir)/etc/rxvt-unicode.terminfo
++	$(INSTALL) -d $(DESTDIR)$(datadir)/terminfo/72
++	@TIC@ -o $(DESTDIR)$(datadir)/terminfo $(srcdir)/etc/rxvt-unicode.terminfo
+ 
+ distdepend: alldoc
+ 

@@ -1,0 +1,38 @@
+--- origsrc/rxvt-unicode-9.15/configure.ac	2012-01-21 07:36:35.000000000 -0500
++++ src/rxvt-unicode-9.15/configure.ac	2012-12-03 23:21:02.058341000 -0500
+@@ -33,11 +33,15 @@ AC_GNU_SOURCE
+ AC_ISC_POSIX
+ AC_LANG(C++)
+ 
+-LINKER="$CXX"
+ dnl check whether we can link with gcc -lsupc++
++dnl however, merely linking is not dispositive; on cygwin linking works
++dnl but executing a program that throws exceptions, while linking only
++dnl with libsubpc++ results in an abort.  So, use cache variables to
++dnl allow this detection scheme to be overridden when required.
++LINKER="$CXX"
+ if test x$GCC = xyes && test x$GXX = xyes; then
+    dnl FreeBSD (at least up to 5.3) has a broken GCC, workaround it
+-   AC_MSG_CHECKING([for working libsupc++])
++   AC_CACHE_CHECK([for working libsubpc++], [ru_cv_prog_linker],[dnl
+    save_CXX="$CXX"
+    save_LIBS="$LIBS"
+    CXX="$CC"
+@@ -45,13 +50,15 @@ if test x$GCC = xyes && test x$GXX = xye
+    AC_LINK_IFELSE(
+       [AC_LANG_PROGRAM([struct test { }; void f() try { throw new test; } catch (...) { throw; }],[])],
+       [AC_MSG_RESULT(ok)
+-       LINKER="$CC"],
++       ru_cv_prog_linker="$CC"],
+       [
+          AC_MSG_RESULT([no, making everything bigger and slower])
+          LIBS="$save_LIBS"
++         ru_cv_prog_linker="$CXX"
+       ]
+    )
+-   CXX="$save_CXX"
++   CXX="$save_CXX"])
++   LINKER=$ru_cv_prog_linker
+ fi
+ AC_SUBST(LINKER,[$LINKER])
+ 
