@@ -1,5 +1,5 @@
 NAME="rxvt-unicode"
-VERSION=9.21
+VERSION=9.22
 RELEASE=1
 CATEGORY="Shells"
 SUMMARY="An improved version of rxvt with Unicode support"
