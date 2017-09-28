@@ -1,6 +1,6 @@
 NAME="rxvt-unicode"
 VERSION=9.22
-RELEASE=1
+RELEASE=2
 CATEGORY="Shells"
 SUMMARY="An improved version of rxvt with Unicode support"
 DESCRIPTION="rxvt-unicode is a colour vt102 terminal emulator intended as an
